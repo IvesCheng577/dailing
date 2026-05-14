@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台登录 · 岱岭</title>
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div class="login-wrap">
+  <form class="login-card" id="loginForm">
+    <div class="login-brand">岱岭</div>
+    <div class="login-sub">Admin Console</div>
+
+    <div class="login-err" id="err"></div>
+
+    <div class="form-row">
+      <label>账号</label>
+      <input name="username" required autofocus autocomplete="username" value="admin">
+    </div>
+    <div class="form-row">
+      <label>密码</label>
+      <input name="password" type="password" required autocomplete="current-password">
+    </div>
+    <button class="login-btn" type="submit">进入后台</button>
+    <div class="login-hint">默认账号 admin / 密码 admin123</div>
+  </form>
+</div>
+
+<script>
+  document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd.entries());
+    const err = document.getElementById('err');
+    err.classList.remove('show');
+    try {
+      const r = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        err.textContent = j.error || '登录失败';
+        err.classList.add('show');
+        return;
+      }
+      location.href = '/admin/';
+    } catch (e) {
+      err.textContent = '网络错误';
+      err.classList.add('show');
+    }
+  };
+</script>
+</body>
+</html>

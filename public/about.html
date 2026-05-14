@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>品牌故事 · 岱岭</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="/" data-bind="brand">岱岭</a>
+    <ul class="nav-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/products.html">臻选好物</a></li>
+      <li><a href="/about.html" class="active">品牌故事</a></li>
+      <li><a href="/contact.html">联系我们</a></li>
+    </ul>
+    <a class="nav-cta" data-tel href="tel:400-888-0000">400-888-0000</a>
+  </div>
+</header>
+
+<section class="page-banner" data-bind-bg="about.bannerBg">
+  <div class="container">
+    <div class="eyebrow" data-bind="about.bannerEyebrow">Our Story</div>
+    <h1 data-bind-html="about.bannerTitle">把山野的好<br>诚意送到您的餐桌</h1>
+    <p data-bind="about.bannerSub">八年间，跨越二十省山川，只为甄选这一份最本真的味道</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="story">
+      <div class="story-visual" data-bind-bg="about.originImage"></div>
+      <div class="story-text">
+        <div class="eyebrow" data-bind="about.originEyebrow">Origin · 缘起</div>
+        <h2 data-bind-html="about.originTitle">始于一个<br>朴素的念头</h2>
+        <p data-bind="about.originP1">2018 年的春天，创始人在云南香格里拉的深山中第一次见到野生松茸。那一刻她忽然意识到，太多真正的好土产，因为缺乏一座桥梁，无法被远方的人尝到；同时也有太多农人，被层层中间环节稀释着应得的回报。</p>
+        <p data-bind="about.originP2">于是有了岱岭——一座以诚信为基的桥。我们走得慢，但走得深。我们买得贵，但买得真。我们不在直播间里喧嚣，只在每一份寄出的包裹里，写下产地、写下农人的名字、写下采摘的那一天。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-light">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Our Principles</div>
+      <h2>三个不变的承诺</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="cats">
+      <div class="cat">
+        <div class="num">N° 01</div>
+        <h3 data-bind="about.principle1Title">原产直供</h3>
+        <p data-bind="about.principle1Desc">我们只与认识超过两年的农户合作。每一批次都附产地档案，可溯可查。</p>
+      </div>
+      <div class="cat">
+        <div class="num">N° 02</div>
+        <h3 data-bind="about.principle2Title">本真味道</h3>
+        <p data-bind="about.principle2Desc">不催熟、不滥添、不漂白、不过度包装。最好的味道，是土地原本的样子。</p>
+      </div>
+      <div class="cat">
+        <div class="num">N° 03</div>
+        <h3 data-bind="about.principle3Title">七日鲜约</h3>
+        <p data-bind="about.principle3Desc">当季时令商品，承诺采后七日内送达。不新鲜，免费重发或全额退款。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Footprints</div>
+      <h2>我们走过的路</h2>
+      <div class="section-divider"></div>
+      <p>从茶山到密林，从草原到沙洲<br>每一步，都为寻找最对的那一味</p>
+    </div>
+    <div class="story-meta" style="border:1px solid var(--line); padding:48px; margin-top:0; display:grid; grid-template-columns: repeat(4,1fr); gap:32px;">
+      <div>
+        <div class="num" data-bind="about.statRegions">20+</div>
+        <div class="label">合作产区</div>
+      </div>
+      <div>
+        <div class="num" data-bind="about.statFarmers">300+</div>
+        <div class="label">匠人农户</div>
+      </div>
+      <div>
+        <div class="num" data-bind="about.statYears">8</div>
+        <div class="label">年用心</div>
+      </div>
+      <div>
+        <div class="num" data-bind="about.statFamilies">120k+</div>
+        <div class="label">家庭信赖</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand" data-bind="brand">岱岭</div>
+        <p class="footer-tagline" data-bind="footerTagline">山野臻品 · 匠心甄选
+把中国大地的好土产
+送到每一个用心的餐桌</p>
+      </div>
+      <div class="footer-col"><h4>关于</h4><a href="/about.html">品牌故事</a><a href="/about.html">产地溯源</a><a href="/about.html">品质承诺</a></div>
+      <div class="footer-col"><h4>服务</h4><a href="/contact.html">配送说明</a><a href="/contact.html">售后保障</a><a href="/contact.html">商务合作</a></div>
+      <div class="footer-col"><h4>联系</h4><p data-bind="phone">400-888-0000</p><p data-bind="email">hello@dailing.com</p><p data-bind="address">杭州市西湖区文三路 88 号</p></div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 <span data-bind="brand">岱岭</span> <span data-bind="brandEn">DAILING</span> · All Rights Reserved</span>
+      <a href="/admin">后台管理</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+
+</body>
+</html>

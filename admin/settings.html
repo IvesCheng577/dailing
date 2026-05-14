@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>网站设置 · 岱岭后台</title>
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="layout">
+  <div id="sb"></div>
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>网站设置</h1>
+        <div class="sub">SETTINGS · 编辑前台页面文案与背景图</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <a href="/" target="_blank" class="btn">预览前台 ↗</a>
+        <button class="btn btn-danger" onclick="resetAll()">恢复默认</button>
+      </div>
+    </div>
+
+    <form class="panel" id="settingsForm" onsubmit="save(event)">
+      <div class="tabs">
+        <button type="button" class="active" data-tab="basic">基本信息</button>
+        <button type="button" data-tab="hero">首页头图</button>
+        <button type="button" data-tab="storyHome">首页故事</button>
+        <button type="button" data-tab="about">品牌故事页</button>
+        <button type="button" data-tab="footer">页脚</button>
+      </div>
+
+      <!-- 基本信息 -->
+      <div class="tab-pane active" data-pane="basic">
+        <div class="section-title">品牌</div>
+        <div class="form-grid cols-2">
+          <div class="form-row">
+            <label>中文品牌名</label>
+            <input name="brand" maxlength="20" placeholder="例：岱岭">
+            <div class="hint">显示在所有页面导航和页脚</div>
+          </div>
+          <div class="form-row">
+            <label>英文品牌名</label>
+            <input name="brandEn" maxlength="20" placeholder="例：DAILING">
+            <div class="hint">用于版权信息</div>
+          </div>
+        </div>
+
+        <div class="section-title">联系方式</div>
+        <div class="form-grid cols-2">
+          <div class="form-row">
+            <label>客服电话</label>
+            <input name="phone" maxlength="30">
+          </div>
+          <div class="form-row">
+            <label>邮箱</label>
+            <input name="email" type="email" maxlength="80">
+          </div>
+          <div class="form-row">
+            <label>地址</label>
+            <input name="address" maxlength="100">
+          </div>
+          <div class="form-row">
+            <label>微信</label>
+            <input name="wechat" maxlength="40">
+          </div>
+          <div class="form-row">
+            <label>营业时间</label>
+            <input name="hours" maxlength="60">
+          </div>
+        </div>
+      </div>
+
+      <!-- 首页头图 -->
+      <div class="tab-pane" data-pane="hero">
+        <div class="section-title">头图文案</div>
+        <div class="form-grid cols-2">
+          <div class="form-row">
+            <label>小标题 (英文/装饰)</label>
+            <input name="hero.eyebrow" maxlength="60">
+          </div>
+          <div class="form-row">
+            <label>强调词（绿色高亮）</label>
+            <input name="hero.titleAccent" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label>主标题 · 第一段</label>
+            <input name="hero.titleLine1" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label>主标题 · 第二段</label>
+            <input name="hero.titleLine2" maxlength="20">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>正文描述</label>
+            <textarea name="hero.desc" rows="3" maxlength="300"></textarea>
+            <div class="hint">建议 60-150 字</div>
+          </div>
+        </div>
+
+        <div class="section-title">头图右侧背景图</div>
+        <div class="upload-row">
+          <div class="preview" id="heroBgPreview">未上传</div>
+          <div class="controls">
+            <input type="file" accept="image/*" onchange="uploadTo(this,'hero.bgImage','heroBgPreview')">
+            <input type="text" name="hero.bgImage" placeholder="/uploads/xxx.jpg 或留空使用默认深绿色块" style="margin-top:8px;">
+            <div class="hint">推荐尺寸 800×1000，建议人物/产地实拍图。留空则显示默认深绿色装饰块。</div>
+          </div>
+        </div>
+
+        <div class="section-title">右下角装饰文字</div>
+        <div class="form-grid cols-2">
+          <div class="form-row">
+            <label>装饰文字 1</label>
+            <input name="hero.badge1" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label>装饰文字 2</label>
+            <input name="hero.badge2" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label>装饰文字 3</label>
+            <input name="hero.badge3" maxlength="20">
+          </div>
+        </div>
+      </div>
+
+      <!-- 首页故事 -->
+      <div class="tab-pane" data-pane="storyHome">
+        <div class="section-title">首页"品牌故事"模块</div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>小标题</label>
+            <input name="storyHome.eyebrow" maxlength="40">
+          </div>
+          <div class="form-row">
+            <label>大标题（支持换行）</label>
+            <textarea name="storyHome.title" rows="2" maxlength="60"></textarea>
+            <div class="hint">每按一次回车，在前台显示为换行</div>
+          </div>
+          <div class="form-row">
+            <label>段落一</label>
+            <textarea name="storyHome.p1" rows="3" maxlength="300"></textarea>
+          </div>
+          <div class="form-row">
+            <label>段落二</label>
+            <textarea name="storyHome.p2" rows="3" maxlength="300"></textarea>
+          </div>
+        </div>
+
+        <div class="section-title">配图</div>
+        <div class="upload-row">
+          <div class="preview" id="storyImgPreview">未上传</div>
+          <div class="controls">
+            <input type="file" accept="image/*" onchange="uploadTo(this,'storyHome.image','storyImgPreview')">
+            <input type="text" name="storyHome.image" placeholder="/uploads/xxx.jpg 或留空使用默认大地色块" style="margin-top:8px;">
+            <div class="hint">推荐尺寸 800×1000</div>
+          </div>
+        </div>
+
+        <div class="section-title">数据指标</div>
+        <div class="form-grid cols-2">
+          <div class="form-row">
+            <label>合作产区数</label>
+            <input name="storyHome.metaRegions" maxlength="10">
+          </div>
+          <div class="form-row">
+            <label>匠人农户数</label>
+            <input name="storyHome.metaFarmers" maxlength="10">
+          </div>
+          <div class="form-row">
+            <label>用心年数</label>
+            <input name="storyHome.metaYears" maxlength="10">
+          </div>
+        </div>
+      </div>
+
+      <!-- 品牌故事页 -->
+      <div class="tab-pane" data-pane="about">
+        <div class="section-title">页头横幅</div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>小标题</label>
+            <input name="about.bannerEyebrow" maxlength="40">
+          </div>
+          <div class="form-row">
+            <label>主标题（支持换行）</label>
+            <textarea name="about.bannerTitle" rows="2" maxlength="60"></textarea>
+          </div>
+          <div class="form-row">
+            <label>副标题</label>
+            <textarea name="about.bannerSub" rows="2" maxlength="120"></textarea>
+          </div>
+        </div>
+        <div class="upload-row" style="margin-top:16px;">
+          <div class="preview" id="aboutBannerPreview">未上传</div>
+          <div class="controls">
+            <input type="file" accept="image/*" onchange="uploadTo(this,'about.bannerBg','aboutBannerPreview')">
+            <input type="text" name="about.bannerBg" placeholder="横幅背景图 (可选)" style="margin-top:8px;">
+            <div class="hint">上传后横幅将变为图片+暗调遮罩。留空则使用默认米色背景。</div>
+          </div>
+        </div>
+
+        <div class="section-title">缘起 · 段落区</div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>小标题</label>
+            <input name="about.originEyebrow" maxlength="40">
+          </div>
+          <div class="form-row">
+            <label>大标题（支持换行）</label>
+            <textarea name="about.originTitle" rows="2" maxlength="60"></textarea>
+          </div>
+          <div class="form-row">
+            <label>段落一</label>
+            <textarea name="about.originP1" rows="4" maxlength="500"></textarea>
+          </div>
+          <div class="form-row">
+            <label>段落二</label>
+            <textarea name="about.originP2" rows="4" maxlength="500"></textarea>
+          </div>
+        </div>
+        <div class="upload-row" style="margin-top:16px;">
+          <div class="preview" id="aboutOriginPreview">未上传</div>
+          <div class="controls">
+            <input type="file" accept="image/*" onchange="uploadTo(this,'about.originImage','aboutOriginPreview')">
+            <input type="text" name="about.originImage" placeholder="/uploads/xxx.jpg" style="margin-top:8px;">
+          </div>
+        </div>
+
+        <div class="section-title">三大承诺</div>
+        <div class="form-grid cols-2">
+          <div class="form-row">
+            <label>N° 01 · 标题</label>
+            <input name="about.principle1Title" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label>N° 01 · 描述</label>
+            <textarea name="about.principle1Desc" rows="2" maxlength="200"></textarea>
+          </div>
+          <div class="form-row">
+            <label>N° 02 · 标题</label>
+            <input name="about.principle2Title" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label>N° 02 · 描述</label>
+            <textarea name="about.principle2Desc" rows="2" maxlength="200"></textarea>
+          </div>
+          <div class="form-row">
+            <label>N° 03 · 标题</label>
+            <input name="about.principle3Title" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label>N° 03 · 描述</label>
+            <textarea name="about.principle3Desc" rows="2" maxlength="200"></textarea>
+          </div>
+        </div>
+
+        <div class="section-title">数据指标（四项）</div>
+        <div class="form-grid cols-2">
+          <div class="form-row">
+            <label>合作产区</label>
+            <input name="about.statRegions" maxlength="10">
+          </div>
+          <div class="form-row">
+            <label>匠人农户</label>
+            <input name="about.statFarmers" maxlength="10">
+          </div>
+          <div class="form-row">
+            <label>用心年数</label>
+            <input name="about.statYears" maxlength="10">
+          </div>
+          <div class="form-row">
+            <label>家庭信赖</label>
+            <input name="about.statFamilies" maxlength="10">
+          </div>
+        </div>
+      </div>
+
+      <!-- 页脚 -->
+      <div class="tab-pane" data-pane="footer">
+        <div class="section-title">页脚文案</div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>品牌简介（支持换行）</label>
+            <textarea name="footerTagline" rows="4" maxlength="200"></textarea>
+            <div class="hint">显示在页脚左侧，品牌名下方</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky-save">
+        <div style="font-size:12px; color:var(--ink-muted);" id="saveStatus">所有修改保存后立即生效于前台</div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn" onclick="load()">放弃修改</button>
+          <button type="submit" class="btn btn-primary">保存设置</button>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script src="/admin/js/admin.js"></script>
+<script>
+  document.getElementById('sb').innerHTML = renderSidebar('settings');
+  bindLogout();
+
+  // tab switching
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`.tab-pane[data-pane="${btn.dataset.tab}"]`).classList.add('active');
+    };
+  });
+
+  function getByPath(o, p) {
+    return p.split('.').reduce((x, k) => (x == null ? x : x[k]), o);
+  }
+  function setByPath(o, p, v) {
+    const ks = p.split('.');
+    let cur = o;
+    for (let i = 0; i < ks.length - 1; i++) {
+      if (typeof cur[ks[i]] !== 'object' || cur[ks[i]] === null) cur[ks[i]] = {};
+      cur = cur[ks[i]];
+    }
+    cur[ks[ks.length - 1]] = v;
+  }
+
+  function setPreview(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (url) el.innerHTML = `<img src="${url}">`;
+    else el.textContent = '未上传';
+  }
+
+  async function load() {
+    const s = await api('/api/admin/settings');
+    const form = document.getElementById('settingsForm');
+    [...form.querySelectorAll('input[name], textarea[name]')].forEach(inp => {
+      if (inp.type === 'file') return;
+      const v = getByPath(s, inp.name);
+      inp.value = (v == null) ? '' : v;
+    });
+    setPreview('heroBgPreview', s.hero && s.hero.bgImage);
+    setPreview('storyImgPreview', s.storyHome && s.storyHome.image);
+    setPreview('aboutBannerPreview', s.about && s.about.bannerBg);
+    setPreview('aboutOriginPreview', s.about && s.about.originImage);
+  }
+
+  async function uploadTo(input, fieldName, previewId) {
+    if (!input.files || !input.files[0]) return;
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    try {
+      const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      if (!r.ok) throw new Error('上传失败');
+      const j = await r.json();
+      const inp = document.querySelector(`[name="${fieldName}"]`);
+      if (inp) inp.value = j.url;
+      setPreview(previewId, j.url);
+      toast('图片已上传，记得点击保存');
+      input.value = '';
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function save(e) {
+    e.preventDefault();
+    const form = document.getElementById('settingsForm');
+    const out = {};
+    [...form.querySelectorAll('input[name], textarea[name]')].forEach(inp => {
+      if (inp.type === 'file') return;
+      setByPath(out, inp.name, inp.value);
+    });
+    try {
+      await api('/api/admin/settings', { method: 'PUT', body: JSON.stringify(out) });
+      toast('设置已保存，前台立即生效');
+      document.getElementById('saveStatus').textContent = '✓ 已保存 · ' + new Date().toLocaleTimeString();
+    } catch (err) { toast(err.message, 'err'); }
+  }
+
+  async function resetAll() {
+    if (!confirm('确认恢复默认设置？所有自定义文案和上传的图片地址将被清空，但已上传的图片文件保留。')) return;
+    try {
+      await api('/api/admin/settings/reset', { method: 'POST' });
+      toast('已恢复默认');
+      load();
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

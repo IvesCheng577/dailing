@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品管理 · 岱岭后台</title>
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="layout">
+  <div id="sb"></div>
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>商品管理</h1>
+        <div class="sub">PRODUCTS · 上架·编辑·下架</div>
+      </div>
+      <button class="btn btn-primary" onclick="openForm()">+ 新增商品</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <div class="tool-bar">
+          <div class="search">
+            <input id="q" placeholder="搜索商品名 / 产地" oninput="filterRender()">
+          </div>
+          <div style="font-size:12px; color:var(--ink-muted);" id="count"></div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:80px;">图片</th>
+              <th>商品名</th>
+              <th>分类</th>
+              <th>产地</th>
+              <th style="text-align:right;">价格</th>
+              <th style="text-align:right;">库存</th>
+              <th>状态</th>
+              <th style="width:160px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <form class="modal-card" id="form" onsubmit="submitForm(event)">
+    <div class="modal-head">
+      <h3 id="modalTitle">新增商品</h3>
+      <button type="button" class="modal-close" onclick="modal(false)">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" name="id">
+      <div class="form-grid cols-2">
+        <div class="form-row">
+          <label>商品名 *</label>
+          <input name="name" required maxlength="60">
+        </div>
+        <div class="form-row">
+          <label>分类 *</label>
+          <select name="cat" id="catSelect" required></select>
+        </div>
+        <div class="form-row">
+          <label>产地</label>
+          <input name="origin" maxlength="40" placeholder="例：浙江·杭州">
+        </div>
+        <div class="form-row">
+          <label>规格</label>
+          <input name="unit" maxlength="40" placeholder="例：盒/250g">
+        </div>
+        <div class="form-row">
+          <label>价格 (元) *</label>
+          <input name="price" type="number" min="0" step="0.01" required>
+        </div>
+        <div class="form-row">
+          <label>库存</label>
+          <input name="stock" type="number" min="0" value="0">
+        </div>
+      </div>
+      <div class="form-grid" style="margin-top:16px;">
+        <div class="form-row">
+          <label>商品图</label>
+          <input type="file" id="imgFile" accept="image/*" onchange="uploadImg(this)">
+          <div class="hint">支持 jpg/png · 上传后自动填充图片地址</div>
+          <input name="image" id="imgUrl" placeholder="/uploads/xxx.jpg 或留空" style="margin-top:8px;">
+          <div id="imgPreview" style="margin-top:10px;"></div>
+        </div>
+        <div class="form-row">
+          <label>商品介绍</label>
+          <textarea name="desc" rows="4" maxlength="500"></textarea>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" name="featured" id="featured">
+          <label for="featured" style="margin:0;">设为臻品（首页推荐）</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn" onclick="modal(false)">取消</button>
+      <button type="submit" class="btn btn-primary">保存</button>
+    </div>
+  </form>
+</div>
+
+<script src="/admin/js/admin.js"></script>
+<script>
+  document.getElementById('sb').innerHTML = renderSidebar('products');
+  bindLogout();
+
+  let allProducts = [];
+  let allCats = [];
+
+  async function load() {
+    [allProducts, allCats] = await Promise.all([
+      api('/api/admin/products'),
+      api('/api/admin/categories')
+    ]);
+    const sel = document.getElementById('catSelect');
+    sel.innerHTML = '<option value="">请选择分类</option>' + allCats.map(c => `<option value="${c.id}">${escape(c.name)}</option>`).join('');
+    filterRender();
+  }
+
+  function filterRender() {
+    const q = (document.getElementById('q').value || '').toLowerCase();
+    const list = allProducts.filter(p =>
+      !q || p.name.toLowerCase().includes(q) || (p.origin || '').toLowerCase().includes(q)
+    );
+    document.getElementById('count').textContent = `共 ${list.length} 件商品`;
+    const tb = document.getElementById('list');
+    tb.innerHTML = list.length
+      ? list.map(p => `<tr>
+          <td>
+            <div class="thumb">${p.image ? `<img src="${escape(p.image)}">` : escape(p.name.slice(0,1))}</div>
+          </td>
+          <td><b>${escape(p.name)}</b></td>
+          <td>${escape(p.catName || '—')}</td>
+          <td style="color:var(--ink-muted)">${escape(p.origin || '—')}</td>
+          <td style="text-align:right;"><b style="color:var(--accent)">¥${p.price}</b></td>
+          <td style="text-align:right;">${p.stock}</td>
+          <td>${p.featured ? '<span class="badge green">臻品</span>' : '<span class="badge">普通</span>'}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn btn-sm" onclick='openForm(${p.id})'>编辑</button>
+              <button class="btn btn-sm btn-danger" onclick="delProduct(${p.id})">删除</button>
+            </div>
+          </td>
+        </tr>`).join('')
+      : `<tr><td colspan="8" class="empty">暂无商品，点击右上角新增</td></tr>`;
+  }
+
+  function openForm(id) {
+    const form = document.getElementById('form');
+    form.reset();
+    document.getElementById('imgPreview').innerHTML = '';
+    if (id) {
+      const p = allProducts.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('modalTitle').textContent = '编辑商品';
+      form.id.value = p.id;
+      form.name.value = p.name;
+      form.cat.value = p.cat;
+      form.origin.value = p.origin || '';
+      form.unit.value = p.unit || '';
+      form.price.value = p.price;
+      form.stock.value = p.stock;
+      form.image.value = p.image || '';
+      form.desc.value = p.desc || '';
+      form.featured.checked = !!p.featured;
+      if (p.image) document.getElementById('imgPreview').innerHTML = `<img src="${escape(p.image)}" style="max-width:120px; border:1px solid var(--line);">`;
+    } else {
+      document.getElementById('modalTitle').textContent = '新增商品';
+      form.id.value = '';
+    }
+    modal(true);
+  }
+
+  async function uploadImg(input) {
+    if (!input.files || !input.files[0]) return;
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    try {
+      const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      if (!r.ok) throw new Error('上传失败');
+      const j = await r.json();
+      document.getElementById('imgUrl').value = j.url;
+      document.getElementById('imgPreview').innerHTML = `<img src="${j.url}" style="max-width:120px; border:1px solid var(--line);">`;
+      toast('图片已上传');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function submitForm(e) {
+    e.preventDefault();
+    const f = e.target;
+    const data = {
+      name: f.name.value.trim(),
+      cat: Number(f.cat.value),
+      origin: f.origin.value,
+      unit: f.unit.value,
+      price: Number(f.price.value),
+      stock: Number(f.stock.value),
+      image: f.image.value,
+      desc: f.desc.value,
+      featured: f.featured.checked
+    };
+    const id = f.id.value;
+    try {
+      if (id) {
+        await api(`/api/admin/products/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+        toast('已更新');
+      } else {
+        await api('/api/admin/products', { method: 'POST', body: JSON.stringify(data) });
+        toast('已创建');
+      }
+      modal(false);
+      await load();
+    } catch (err) { toast(err.message, 'err'); }
+  }
+
+  async function delProduct(id) {
+    if (!confirm('确认删除该商品？此操作不可撤销')) return;
+    try {
+      await api(`/api/admin/products/${id}`, { method: 'DELETE' });
+      toast('已删除');
+      await load();
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

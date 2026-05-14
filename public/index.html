@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>岱岭 · 农特产品展销</title>
+<meta name="description" content="精选中国大地原产农特产品 · 山野馈赠 · 匠心臻选">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="/" data-bind="brand">岱岭</a>
+    <ul class="nav-links">
+      <li><a href="/" class="active">首页</a></li>
+      <li><a href="/products.html">臻选好物</a></li>
+      <li><a href="/about.html">品牌故事</a></li>
+      <li><a href="/contact.html">联系我们</a></li>
+    </ul>
+    <a class="nav-cta" data-tel href="tel:400-888-0000">400-888-0000</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container hero-inner">
+    <div>
+      <div class="hero-eyebrow" data-bind="hero.eyebrow">Selected · 山野臻品</div>
+      <h1>
+        <span data-bind="hero.titleLine1">来自</span><span class="accent" data-bind="hero.titleAccent">山川大地</span><br><span data-bind="hero.titleLine2">的至诚馈赠</span>
+      </h1>
+      <p data-bind="hero.desc">跨越南北二十省，深入产地源头。我们只甄选时令最好、土地最净、匠人最专的那一份，把山野的香气与农人的心意，原封呈到您的餐桌。</p>
+      <div class="hero-actions">
+        <a href="/products.html" class="btn btn-primary">浏览臻选</a>
+        <a href="/about.html" class="btn btn-ghost">品牌故事</a>
+      </div>
+    </div>
+    <div class="hero-visual" data-bind-bg="hero.bgImage">
+      <div class="badges">
+        <span data-bind="hero.badge1">SINCE 2018</span>
+        <span data-bind="hero.badge2">原产直供</span>
+        <span data-bind="hero.badge3">EST. 岱岭</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Categories</div>
+      <h2>五大臻选品类</h2>
+      <div class="section-divider"></div>
+      <p>从茶山到密林，从草原到沙洲<br>每一寸土地都有它独有的味道</p>
+    </div>
+    <div class="cats" id="cats"></div>
+  </div>
+</section>
+
+<section class="section section-light">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Featured</div>
+      <h2>本季精选</h2>
+      <div class="section-divider"></div>
+      <p>当季而生 · 应时而采 · 匠心而制</p>
+    </div>
+    <div class="products" id="featured"></div>
+    <div style="text-align:center; margin-top:64px;">
+      <a href="/products.html" class="btn btn-ghost">查看全部臻选</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="story">
+      <div class="story-visual" data-bind-bg="storyHome.image"></div>
+      <div class="story-text">
+        <div class="eyebrow" data-bind="storyHome.eyebrow">Our Story</div>
+        <h2 data-bind-html="storyHome.title">把山野的好<br>诚意送到您的餐桌</h2>
+        <p data-bind="storyHome.p1">岱岭起源于一个朴素的念头——让真正的好土产，能被更多人尝到。八年间，我们走遍二十余省，与三百多位农人、匠人建立长期合作。</p>
+        <p data-bind="storyHome.p2">不催熟、不滥添、不过度包装。我们相信，最好的味道，是土地本来的样子。</p>
+        <div class="story-meta">
+          <div>
+            <div class="num" data-bind="storyHome.metaRegions">20+</div>
+            <div class="label">合作产区</div>
+          </div>
+          <div>
+            <div class="num" data-bind="storyHome.metaFarmers">300+</div>
+            <div class="label">匠人农户</div>
+          </div>
+          <div>
+            <div class="num" data-bind="storyHome.metaYears">8</div>
+            <div class="label">年用心</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand" data-bind="brand">岱岭</div>
+        <p class="footer-tagline" data-bind="footerTagline">山野臻品 · 匠心甄选
+把中国大地的好土产
+送到每一个用心的餐桌</p>
+      </div>
+      <div class="footer-col">
+        <h4>关于</h4>
+        <a href="/about.html">品牌故事</a>
+        <a href="/about.html">产地溯源</a>
+        <a href="/about.html">品质承诺</a>
+      </div>
+      <div class="footer-col">
+        <h4>服务</h4>
+        <a href="/contact.html">配送说明</a>
+        <a href="/contact.html">售后保障</a>
+        <a href="/contact.html">商务合作</a>
+      </div>
+      <div class="footer-col">
+        <h4>联系</h4>
+        <p data-bind="phone">400-888-0000</p>
+        <p data-bind="email">hello@dailing.com</p>
+        <p data-bind="address">杭州市西湖区文三路 88 号</p>
+      </div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 <span data-bind="brand">岱岭</span> <span data-bind="brandEn">DAILING</span> · All Rights Reserved</span>
+      <a href="/admin">后台管理</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/main.js"></script>
+<script>
+  (async () => {
+    const cats = await api('/api/categories');
+    const catsEl = document.getElementById('cats');
+    cats.slice(0, 5).forEach((c, i) => {
+      const a = document.createElement('a');
+      a.className = 'cat';
+      a.href = `/products.html?cat=${c.id}`;
+      a.innerHTML = `
+        <div class="num">N° ${String(i+1).padStart(2,'0')}</div>
+        <h3>${c.name}</h3>
+        <p>${c.desc || ''}</p>
+      `;
+      catsEl.appendChild(a);
+    });
+
+    const featured = await api('/api/products?featured=1');
+    const fEl = document.getElementById('featured');
+    featured.slice(0, 8).forEach(p => fEl.appendChild(productCard(p)));
+  })();
+</script>
+
+</body>
+</html>

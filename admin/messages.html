@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>留言反馈 · 岱岭后台</title>
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="layout">
+  <div id="sb"></div>
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>留言反馈</h1>
+        <div class="sub">MESSAGES · 来自前台联系页</div>
+      </div>
+      <div style="font-size:13px; color:var(--ink-muted);" id="count"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <div class="tool-bar">
+          <div class="search">
+            <input id="q" placeholder="搜索姓名 / 联系方式 / 内容" oninput="render()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:140px;">姓名</th>
+              <th style="width:200px;">联系方式</th>
+              <th>留言内容</th>
+              <th style="width:180px;">时间</th>
+              <th style="width:90px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/js/admin.js"></script>
+<script>
+  document.getElementById('sb').innerHTML = renderSidebar('messages');
+  bindLogout();
+
+  let all = [];
+
+  async function load() {
+    all = await api('/api/admin/messages');
+    document.getElementById('count').textContent = `共 ${all.length} 条留言`;
+    render();
+  }
+
+  function render() {
+    const q = (document.getElementById('q').value || '').toLowerCase();
+    const list = all.filter(m =>
+      !q || [m.name, m.contact, m.content].some(v => (v || '').toLowerCase().includes(q))
+    );
+    const tb = document.getElementById('list');
+    tb.innerHTML = list.length
+      ? list.map(m => `<tr>
+          <td><b>${escape(m.name)}</b></td>
+          <td>${escape(m.contact)}</td>
+          <td style="color:var(--ink-soft); white-space:pre-wrap; line-height:1.7;">${escape(m.content)}</td>
+          <td style="color:var(--ink-muted); font-size:12px;">${fmtDate(m.createdAt)}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="del(${m.id})">删除</button>
+          </td>
+        </tr>`).join('')
+      : `<tr><td colspan="5" class="empty">暂无留言</td></tr>`;
+  }
+
+  async function del(id) {
+    if (!confirm('确认删除该留言？')) return;
+    try {
+      await api(`/api/admin/messages/${id}`, { method: 'DELETE' });
+      toast('已删除');
+      load();
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

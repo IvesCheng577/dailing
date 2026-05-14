@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>订单管理 · 岱岭后台</title>
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="layout">
+  <div id="sb"></div>
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>订单管理</h1>
+        <div class="sub">ORDERS · 处理预订单</div>
+      </div>
+      <div style="font-size:13px; color:var(--ink-muted);" id="summary"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <div class="tool-bar">
+          <div class="search">
+            <input id="q" placeholder="搜索客户姓名 / 电话 / 商品" oninput="render()">
+          </div>
+          <div>
+            <select id="statusFilter" onchange="render()" style="padding:9px 12px; border:1px solid var(--line); background:#fff; font-family:inherit; font-size:13px;">
+              <option value="">全部状态</option>
+              <option value="待处理">待处理</option>
+              <option value="已发货">已发货</option>
+              <option value="已完成">已完成</option>
+              <option value="已取消">已取消</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>订单号</th>
+              <th>商品</th>
+              <th>数量</th>
+              <th style="text-align:right;">金额</th>
+              <th>客户</th>
+              <th>地址</th>
+              <th>状态</th>
+              <th>时间</th>
+              <th style="width:160px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Detail modal -->
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>订单详情</h3>
+      <button type="button" class="modal-close" onclick="modal(false)">&times;</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot">
+      <button type="button" class="btn" onclick="modal(false)">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script src="/admin/js/admin.js"></script>
+<script>
+  document.getElementById('sb').innerHTML = renderSidebar('orders');
+  bindLogout();
+
+  let all = [];
+
+  function statusBadge(s) {
+    const cls = s === '已完成' ? 'green' : s === '已取消' ? 'red' : 'amber';
+    return `<span class="badge ${cls}">${escape(s)}</span>`;
+  }
+
+  async function load() {
+    all = await api('/api/admin/orders');
+    const total = all.reduce((s, o) => s + (o.total || 0), 0);
+    const pending = all.filter(o => o.status === '待处理').length;
+    document.getElementById('summary').innerHTML = `共 <b>${all.length}</b> 单 · 待处理 <b style="color:var(--accent)">${pending}</b> 单 · 总金额 <b>¥${total}</b>`;
+    render();
+  }
+
+  function render() {
+    const q = (document.getElementById('q').value || '').toLowerCase();
+    const st = document.getElementById('statusFilter').value;
+    const list = all.filter(o => {
+      if (st && o.status !== st) return false;
+      if (!q) return true;
+      return [o.name, o.phone, o.productName].some(v => (v || '').toLowerCase().includes(q));
+    });
+    const tb = document.getElementById('list');
+    tb.innerHTML = list.length
+      ? list.map(o => `<tr>
+          <td>#${o.id}</td>
+          <td><b>${escape(o.productName)}</b></td>
+          <td>${o.qty}</td>
+          <td style="text-align:right;"><b style="color:var(--accent)">¥${o.total}</b></td>
+          <td>${escape(o.name)}<br><span style="color:var(--ink-muted); font-size:12px;">${escape(o.phone)}</span></td>
+          <td style="max-width:220px; color:var(--ink-soft); font-size:13px;">${escape(o.address)}</td>
+          <td>${statusBadge(o.status)}</td>
+          <td style="color:var(--ink-muted); font-size:12px;">${fmtDate(o.createdAt)}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn btn-sm" onclick="showDetail(${o.id})">详情</button>
+              <button class="btn btn-sm btn-danger" onclick="del(${o.id})">删除</button>
+            </div>
+          </td>
+        </tr>`).join('')
+      : `<tr><td colspan="9" class="empty">暂无订单</td></tr>`;
+  }
+
+  function showDetail(id) {
+    const o = all.find(x => x.id === id);
+    if (!o) return;
+    document.getElementById('detailBody').innerHTML = `
+      <div class="form-grid">
+        <div class="form-row"><label>订单号</label><div>#${o.id}</div></div>
+        <div class="form-row"><label>商品</label><div><b>${escape(o.productName)}</b> · ${escape(o.unit || '')}</div></div>
+        <div class="form-grid cols-2">
+          <div class="form-row"><label>单价</label><div>¥${o.price}</div></div>
+          <div class="form-row"><label>数量</label><div>${o.qty}</div></div>
+        </div>
+        <div class="form-row"><label>合计</label><div style="font-size:22px; color:var(--accent); font-family:'Songti SC',serif;">¥${o.total}</div></div>
+        <div class="form-grid cols-2">
+          <div class="form-row"><label>收件人</label><div>${escape(o.name)}</div></div>
+          <div class="form-row"><label>电话</label><div>${escape(o.phone)}</div></div>
+        </div>
+        <div class="form-row"><label>地址</label><div>${escape(o.address)}</div></div>
+        ${o.note ? `<div class="form-row"><label>备注</label><div style="color:var(--ink-soft)">${escape(o.note)}</div></div>` : ''}
+        <div class="form-row"><label>下单时间</label><div style="color:var(--ink-muted)">${fmtDate(o.createdAt)}</div></div>
+        <div class="form-row">
+          <label>订单状态</label>
+          <select id="statusEdit" style="padding:10px 12px; border:1px solid var(--line); background:#fff; font-family:inherit; font-size:14px;">
+            ${['待处理','已发货','已完成','已取消'].map(s => `<option value="${s}" ${s===o.status?'selected':''}>${s}</option>`).join('')}
+          </select>
+          <button class="btn btn-primary btn-sm" style="margin-top:10px; align-self:start;" onclick="updateStatus(${o.id})">更新状态</button>
+        </div>
+      </div>
+    `;
+    modal(true);
+  }
+
+  async function updateStatus(id) {
+    const status = document.getElementById('statusEdit').value;
+    try {
+      await api(`/api/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
+      toast('状态已更新');
+      modal(false);
+      load();
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function del(id) {
+    if (!confirm('确认删除该订单？')) return;
+    try {
+      await api(`/api/admin/orders/${id}`, { method: 'DELETE' });
+      toast('已删除');
+      load();
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

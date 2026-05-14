@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>总览 · 岱岭后台</title>
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="layout">
+  <div id="sb"></div>
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>总览</h1>
+        <div class="sub">DASHBOARD · 经营数据一览</div>
+      </div>
+      <div style="font-size:13px; color:var(--ink-muted);" id="today"></div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><div class="label">商品总数</div><div class="val">—</div></div>
+      <div class="stat"><div class="label">分类数量</div><div class="val">—</div></div>
+      <div class="stat accent"><div class="label">订单总数</div><div class="val">—</div></div>
+      <div class="stat warn"><div class="label">待处理订单</div><div class="val">—</div></div>
+      <div class="stat"><div class="label">留言数量</div><div class="val">—</div></div>
+      <div class="stat accent"><div class="label">销售总额</div><div class="val">—</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>最新订单</h2>
+        <a href="/admin/orders.html" class="btn btn-sm">查看全部 →</a>
+      </div>
+      <table>
+        <thead><tr><th>订单号</th><th>商品</th><th>客户</th><th>金额</th><th>状态</th><th>时间</th></tr></thead>
+        <tbody id="recentOrders"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>最新留言</h2>
+        <a href="/admin/messages.html" class="btn btn-sm">查看全部 →</a>
+      </div>
+      <table>
+        <thead><tr><th>姓名</th><th>联系方式</th><th>内容</th><th>时间</th></tr></thead>
+        <tbody id="recentMsgs"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/js/admin.js"></script>
+<script>
+  document.getElementById('sb').innerHTML = renderSidebar('dashboard');
+  bindLogout();
+  document.getElementById('today').textContent = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
+
+  function statusBadge(s) {
+    const cls = s === '已完成' ? 'green' : s === '已取消' ? 'red' : 'amber';
+    return `<span class="badge ${cls}">${escape(s)}</span>`;
+  }
+
+  (async () => {
+    try {
+      const s = await api('/api/admin/stats');
+      const labels = ['商品总数','分类数量','订单总数','待处理订单','留言数量','销售总额'];
+      const values = [s.products, s.categories, s.orders, s.pendingOrders, s.messages, '¥' + s.totalSales];
+      const cards = document.querySelectorAll('#stats .stat .val');
+      values.forEach((v, i) => cards[i].textContent = v);
+    } catch (e) { toast(e.message, 'err'); }
+
+    try {
+      const orders = await api('/api/admin/orders');
+      const tb = document.getElementById('recentOrders');
+      const recent = orders.slice(0, 6);
+      tb.innerHTML = recent.length
+        ? recent.map(o => `<tr>
+          <td>#${o.id}</td>
+          <td>${escape(o.productName)} × ${o.qty}</td>
+          <td>${escape(o.name)} · ${escape(o.phone)}</td>
+          <td><b>¥${o.total}</b></td>
+          <td>${statusBadge(o.status)}</td>
+          <td style="color:var(--ink-muted)">${fmtDate(o.createdAt)}</td>
+        </tr>`).join('')
+        : `<tr><td colspan="6" class="empty">暂无订单</td></tr>`;
+    } catch (e) {}
+
+    try {
+      const msgs = await api('/api/admin/messages');
+      const tb = document.getElementById('recentMsgs');
+      const recent = msgs.slice(0, 5);
+      tb.innerHTML = recent.length
+        ? recent.map(m => `<tr>
+          <td>${escape(m.name)}</td>
+          <td>${escape(m.contact)}</td>
+          <td style="max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escape(m.content)}</td>
+          <td style="color:var(--ink-muted)">${fmtDate(m.createdAt)}</td>
+        </tr>`).join('')
+        : `<tr><td colspan="4" class="empty">暂无留言</td></tr>`;
+    } catch (e) {}
+  })();
+</script>
+</body>
+</html>

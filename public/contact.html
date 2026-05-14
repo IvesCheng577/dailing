@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>联系我们 · 岱岭</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="/" data-bind="brand">岱岭</a>
+    <ul class="nav-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/products.html">臻选好物</a></li>
+      <li><a href="/about.html">品牌故事</a></li>
+      <li><a href="/contact.html" class="active">联系我们</a></li>
+    </ul>
+    <a class="nav-cta" data-tel href="tel:400-888-0000">400-888-0000</a>
+  </div>
+</header>
+
+<section class="page-banner">
+  <div class="container">
+    <div class="eyebrow">Contact</div>
+    <h1>与我们对话</h1>
+    <p>无论是订购、合作还是建议，我们都在</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="contact">
+      <div class="contact-info">
+        <p>如果您有任何问题、合作意向或建议，请留下您的信息，我们会在 24 小时内回复。也欢迎您直接电话或邮件联系。</p>
+        <ul class="contact-list">
+          <li><span class="k">CALL</span><span data-bind="phone">400-888-0000</span></li>
+          <li><span class="k">EMAIL</span><span data-bind="email">hello@dailing.com</span></li>
+          <li><span class="k">ADDRESS</span><span data-bind="address">杭州市西湖区文三路 88 号</span></li>
+          <li><span class="k">HOURS</span><span data-bind="hours">周一至周日 09:00 – 21:00</span></li>
+          <li><span class="k">WECHAT</span><span data-bind="wechat">dailing_official</span></li>
+        </ul>
+      </div>
+
+      <form class="form-grid" id="msgForm" style="background:var(--white); padding:48px; border:1px solid var(--line);">
+        <h3 style="font-family:'Songti SC',serif; font-size:24px; margin-bottom:4px;">留言咨询</h3>
+        <p style="font-size:13px; color:var(--ink-muted); margin-bottom:16px;">请如实填写以下信息，我们会尽快与您联系</p>
+        <div class="form-row">
+          <label>姓名</label>
+          <input name="name" required maxlength="40">
+        </div>
+        <div class="form-row">
+          <label>联系方式 (电话或邮箱)</label>
+          <input name="contact" required maxlength="80">
+        </div>
+        <div class="form-row">
+          <label>留言内容</label>
+          <textarea name="content" rows="5" required maxlength="500"></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">提交留言</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand" data-bind="brand">岱岭</div>
+        <p class="footer-tagline" data-bind="footerTagline">山野臻品 · 匠心甄选
+把中国大地的好土产
+送到每一个用心的餐桌</p>
+      </div>
+      <div class="footer-col"><h4>关于</h4><a href="/about.html">品牌故事</a><a href="/about.html">产地溯源</a><a href="/about.html">品质承诺</a></div>
+      <div class="footer-col"><h4>服务</h4><a href="/contact.html">配送说明</a><a href="/contact.html">售后保障</a><a href="/contact.html">商务合作</a></div>
+      <div class="footer-col"><h4>联系</h4><p data-bind="phone">400-888-0000</p><p data-bind="email">hello@dailing.com</p><p data-bind="address">杭州市西湖区文三路 88 号</p></div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 <span data-bind="brand">岱岭</span> <span data-bind="brandEn">DAILING</span> · All Rights Reserved</span>
+      <a href="/admin">后台管理</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/main.js"></script>
+<script>
+  document.getElementById('msgForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd.entries());
+    try {
+      await api('/api/messages', { method: 'POST', body: JSON.stringify(data) });
+      toast('留言已收到，我们会尽快与您联系');
+      e.target.reset();
+    } catch (err) {
+      toast(err.message);
+    }
+  };
+</script>
+
+</body>
+</html>

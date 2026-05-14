@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品详情 · 岱岭</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="/" data-bind="brand">岱岭</a>
+    <ul class="nav-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/products.html" class="active">臻选好物</a></li>
+      <li><a href="/about.html">品牌故事</a></li>
+      <li><a href="/contact.html">联系我们</a></li>
+    </ul>
+    <a class="nav-cta" data-tel href="tel:400-888-0000">400-888-0000</a>
+  </div>
+</header>
+
+<section class="container">
+  <div class="detail" id="detail">
+    <div style="padding:80px 0; text-align:center; color:var(--ink-muted); grid-column:1/-1;">加载中…</div>
+  </div>
+</section>
+
+<!-- Order modal -->
+<div class="modal" id="orderModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeOrder()">&times;</button>
+    <h3>预订下单</h3>
+    <p class="sub" id="orderSub"></p>
+    <form id="orderForm" class="form-grid">
+      <div class="form-row">
+        <label>收件人</label>
+        <input name="name" required maxlength="40">
+      </div>
+      <div class="form-row">
+        <label>联系电话</label>
+        <input name="phone" required maxlength="20">
+      </div>
+      <div class="form-row">
+        <label>收货地址</label>
+        <input name="address" required maxlength="120">
+      </div>
+      <div class="form-row">
+        <label>备注 (可选)</label>
+        <textarea name="note" rows="2"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">确认提交</button>
+    </form>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand" data-bind="brand">岱岭</div>
+        <p class="footer-tagline" data-bind="footerTagline">山野臻品 · 匠心甄选
+把中国大地的好土产
+送到每一个用心的餐桌</p>
+      </div>
+      <div class="footer-col"><h4>关于</h4><a href="/about.html">品牌故事</a><a href="/about.html">产地溯源</a><a href="/about.html">品质承诺</a></div>
+      <div class="footer-col"><h4>服务</h4><a href="/contact.html">配送说明</a><a href="/contact.html">售后保障</a><a href="/contact.html">商务合作</a></div>
+      <div class="footer-col"><h4>联系</h4><p data-bind="phone">400-888-0000</p><p data-bind="email">hello@dailing.com</p><p data-bind="address">杭州市西湖区文三路 88 号</p></div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 <span data-bind="brand">岱岭</span> <span data-bind="brandEn">DAILING</span> · All Rights Reserved</span>
+      <a href="/admin">后台管理</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/main.js"></script>
+<script>
+  let currentProduct = null;
+
+  (async () => {
+    const id = qs('id');
+    if (!id) { location.href = '/products.html'; return; }
+    try {
+      const p = await api(`/api/products/${id}`);
+      currentProduct = p;
+      const img = p.image
+        ? `<div class="detail-img"><img src="${escape(p.image)}" alt="${escape(p.name)}"></div>`
+        : `<div class="detail-img placeholder" data-text="${escape(p.name.slice(0,1))}"></div>`;
+      document.getElementById('detail').innerHTML = `
+        ${img}
+        <div class="detail-info">
+          <div class="cat-tag">${escape(p.catName || '')}</div>
+          <h1>${escape(p.name)}</h1>
+          <div class="origin">产地 · ${escape(p.origin || '')}</div>
+          <div class="detail-desc">${escape(p.desc || '')}</div>
+          <div class="detail-meta">
+            <div class="k">规格</div><div class="v">${escape(p.unit || '—')}</div>
+            <div class="k">产地</div><div class="v">${escape(p.origin || '—')}</div>
+            <div class="k">分类</div><div class="v">${escape(p.catName || '—')}</div>
+            <div class="k">库存</div><div class="v">${p.stock} 件可订</div>
+          </div>
+          <div class="detail-price">
+            <span class="currency">¥</span>
+            <span class="num">${p.price}</span>
+            <span class="unit">${escape(p.unit || '')}</span>
+          </div>
+          <div class="qty-row">
+            <label>数量</label>
+            <div class="qty">
+              <button type="button" onclick="changeQty(-1)">−</button>
+              <input id="qty" value="1" type="number" min="1" max="${p.stock}">
+              <button type="button" onclick="changeQty(1)">+</button>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="openOrder()">立即预订</button>
+        </div>
+      `;
+      const brand = (window.__settings && window.__settings.brand) || '岱岭';
+      document.title = `${p.name} · ${brand}`;
+    } catch (e) {
+      document.getElementById('detail').innerHTML = `<div style="padding:80px 0; text-align:center; color:var(--ink-muted); grid-column:1/-1;">商品未找到</div>`;
+    }
+  })();
+
+  function changeQty(d) {
+    const i = document.getElementById('qty');
+    let v = Number(i.value) + d;
+    if (v < 1) v = 1;
+    if (currentProduct && v > currentProduct.stock) v = currentProduct.stock;
+    i.value = v;
+  }
+
+  function openOrder() {
+    if (!currentProduct) return;
+    const q = Number(document.getElementById('qty').value || 1);
+    document.getElementById('orderSub').textContent = `${currentProduct.name} × ${q} · 合计 ¥${currentProduct.price * q}`;
+    document.getElementById('orderModal').classList.add('open');
+  }
+  function closeOrder() { document.getElementById('orderModal').classList.remove('open'); }
+
+  document.getElementById('orderForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd.entries());
+    data.productId = currentProduct.id;
+    data.qty = Number(document.getElementById('qty').value || 1);
+    try {
+      await api('/api/orders', { method: 'POST', body: JSON.stringify(data) });
+      closeOrder();
+      toast('订单已提交，我们会尽快联系您');
+      e.target.reset();
+    } catch (err) {
+      toast(err.message);
+    }
+  };
+</script>
+
+</body>
+</html>

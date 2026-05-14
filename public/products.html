@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>臻选好物 · 岱岭</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="/" data-bind="brand">岱岭</a>
+    <ul class="nav-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/products.html" class="active">臻选好物</a></li>
+      <li><a href="/about.html">品牌故事</a></li>
+      <li><a href="/contact.html">联系我们</a></li>
+    </ul>
+    <a class="nav-cta" data-tel href="tel:400-888-0000">400-888-0000</a>
+  </div>
+</header>
+
+<section class="page-banner">
+  <div class="container">
+    <div class="eyebrow">Selected Goods</div>
+    <h1>臻选好物</h1>
+    <p>每一样，都来自我们亲自走过的山川田野</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="filter-bar" id="filter"></div>
+    <div class="products" id="list"></div>
+    <div id="empty" style="display:none; text-align:center; padding:80px 0; color:var(--ink-muted);">
+      该分类下暂未上架商品
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand" data-bind="brand">岱岭</div>
+        <p class="footer-tagline" data-bind="footerTagline">山野臻品 · 匠心甄选
+把中国大地的好土产
+送到每一个用心的餐桌</p>
+      </div>
+      <div class="footer-col"><h4>关于</h4><a href="/about.html">品牌故事</a><a href="/about.html">产地溯源</a><a href="/about.html">品质承诺</a></div>
+      <div class="footer-col"><h4>服务</h4><a href="/contact.html">配送说明</a><a href="/contact.html">售后保障</a><a href="/contact.html">商务合作</a></div>
+      <div class="footer-col"><h4>联系</h4><p data-bind="phone">400-888-0000</p><p data-bind="email">hello@dailing.com</p><p data-bind="address">杭州市西湖区文三路 88 号</p></div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 <span data-bind="brand">岱岭</span> <span data-bind="brandEn">DAILING</span> · All Rights Reserved</span>
+      <a href="/admin">后台管理</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/main.js"></script>
+<script>
+  let currentCat = qs('cat') || '';
+
+  async function render() {
+    const url = currentCat ? `/api/products?cat=${currentCat}` : '/api/products';
+    const list = await api(url);
+    const listEl = document.getElementById('list');
+    listEl.innerHTML = '';
+    document.getElementById('empty').style.display = list.length ? 'none' : 'block';
+    list.forEach(p => listEl.appendChild(productCard(p)));
+  }
+
+  (async () => {
+    const cats = await api('/api/categories');
+    const fb = document.getElementById('filter');
+    const allBtn = document.createElement('button');
+    allBtn.textContent = '全部';
+    allBtn.onclick = () => { currentCat = ''; setActive(allBtn); render(); history.replaceState(null,'','/products.html'); };
+    fb.appendChild(allBtn);
+
+    cats.forEach(c => {
+      const b = document.createElement('button');
+      b.textContent = c.name;
+      b.onclick = () => { currentCat = c.id; setActive(b); render(); history.replaceState(null,'',`/products.html?cat=${c.id}`); };
+      if (String(c.id) === String(currentCat)) b.classList.add('active');
+      fb.appendChild(b);
+    });
+
+    if (!currentCat) allBtn.classList.add('active');
+
+    function setActive(btn) {
+      [...fb.children].forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    render();
+  })();
+</script>
+
+</body>
+</html>

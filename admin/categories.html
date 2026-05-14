@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分类管理 · 岱岭后台</title>
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="layout">
+  <div id="sb"></div>
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>分类管理</h1>
+        <div class="sub">CATEGORIES · 商品分类维护</div>
+      </div>
+      <button class="btn btn-primary" onclick="openForm()">+ 新增分类</button>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px;">ID</th>
+            <th>名称</th>
+            <th>标识 (slug)</th>
+            <th>说明</th>
+            <th style="width:160px;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="list"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="modal">
+  <form class="modal-card" id="form" onsubmit="submitForm(event)">
+    <div class="modal-head">
+      <h3 id="modalTitle">新增分类</h3>
+      <button type="button" class="modal-close" onclick="modal(false)">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" name="id">
+      <div class="form-grid">
+        <div class="form-row">
+          <label>分类名 *</label>
+          <input name="name" required maxlength="30">
+        </div>
+        <div class="form-row">
+          <label>标识 (英文)</label>
+          <input name="slug" maxlength="30" placeholder="例：tea / mushroom">
+        </div>
+        <div class="form-row">
+          <label>说明</label>
+          <input name="desc" maxlength="80" placeholder="一句话描述">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn" onclick="modal(false)">取消</button>
+      <button type="submit" class="btn btn-primary">保存</button>
+    </div>
+  </form>
+</div>
+
+<script src="/admin/js/admin.js"></script>
+<script>
+  document.getElementById('sb').innerHTML = renderSidebar('categories');
+  bindLogout();
+
+  let all = [];
+
+  async function load() {
+    all = await api('/api/admin/categories');
+    const tb = document.getElementById('list');
+    tb.innerHTML = all.length
+      ? all.map(c => `<tr>
+          <td style="color:var(--ink-muted)">#${c.id}</td>
+          <td><b>${escape(c.name)}</b></td>
+          <td><span class="badge">${escape(c.slug || '—')}</span></td>
+          <td style="color:var(--ink-soft)">${escape(c.desc || '—')}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn btn-sm" onclick='openForm(${c.id})'>编辑</button>
+              <button class="btn btn-sm btn-danger" onclick="del(${c.id})">删除</button>
+            </div>
+          </td>
+        </tr>`).join('')
+      : `<tr><td colspan="5" class="empty">暂无分类</td></tr>`;
+  }
+
+  function openForm(id) {
+    const f = document.getElementById('form');
+    f.reset();
+    if (id) {
+      const c = all.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('modalTitle').textContent = '编辑分类';
+      f.id.value = c.id;
+      f.name.value = c.name;
+      f.slug.value = c.slug || '';
+      f.desc.value = c.desc || '';
+    } else {
+      document.getElementById('modalTitle').textContent = '新增分类';
+      f.id.value = '';
+    }
+    modal(true);
+  }
+
+  async function submitForm(e) {
+    e.preventDefault();
+    const f = e.target;
+    const data = { name: f.name.value.trim(), slug: f.slug.value.trim(), desc: f.desc.value };
+    try {
+      if (f.id.value) {
+        await api(`/api/admin/categories/${f.id.value}`, { method: 'PUT', body: JSON.stringify(data) });
+        toast('已更新');
+      } else {
+        await api('/api/admin/categories', { method: 'POST', body: JSON.stringify(data) });
+        toast('已创建');
+      }
+      modal(false);
+      load();
+    } catch (err) { toast(err.message, 'err'); }
+  }
+
+  async function del(id) {
+    if (!confirm('确认删除该分类？该分类下若有商品将无法删除')) return;
+    try {
+      await api(`/api/admin/categories/${id}`, { method: 'DELETE' });
+      toast('已删除');
+      load();
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  load();
+</script>
+</body>
+</html>
