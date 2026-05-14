@@ -426,6 +426,8 @@ app.get(['/admin', '/admin/'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'admin', 'index.html'));
 });
 app.use('/admin', requireAuth, express.static(path.join(__dirname, 'admin')));
+// Serve uploads from UPLOAD_DIR (allows persistent-volume mounts outside /public)
+app.use('/uploads', express.static(UPLOAD_DIR));
 app.use(express.static(path.join(__dirname, 'public')));
 
 loadDB();
