@@ -29,6 +29,7 @@
         <button type="button" data-tab="storyHome">首页故事</button>
         <button type="button" data-tab="about">品牌故事页</button>
         <button type="button" data-tab="footer">页脚</button>
+        <button type="button" data-tab="security">账号安全</button>
       </div>
 
       <!-- 基本信息 -->
@@ -292,6 +293,37 @@
         </div>
       </div>
 
+      <!-- 账号安全 -->
+      <div class="tab-pane" data-pane="security">
+        <div class="section-title">修改后台账号 / 密码</div>
+        <div class="form-grid" style="max-width:480px;">
+          <div class="form-row">
+            <label>原密码 *</label>
+            <input type="password" id="oldPassword" autocomplete="current-password" required>
+          </div>
+          <div class="form-row">
+            <label>新登录账号 (可选，留空保持不变)</label>
+            <input type="text" id="newUsername" maxlength="40" autocomplete="username">
+            <div class="hint">默认账号 admin，建议改为不易猜测的名称</div>
+          </div>
+          <div class="form-row">
+            <label>新密码 *</label>
+            <input type="password" id="newPassword" minlength="6" maxlength="60" autocomplete="new-password" required>
+            <div class="hint">至少 6 位，建议包含字母+数字</div>
+          </div>
+          <div class="form-row">
+            <label>再次输入新密码 *</label>
+            <input type="password" id="newPassword2" minlength="6" maxlength="60" autocomplete="new-password" required>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <button type="button" class="btn btn-primary" onclick="changePassword()">提交修改</button>
+          </div>
+          <div style="font-size:12px; color:var(--ink-muted); margin-top:12px; padding:14px 16px; background:#fbf2e8; border-left:3px solid var(--accent);">
+            ⚠ 修改成功后会自动退出登录，请用新账号密码重新登录。密码以加盐 scrypt 哈希存储，无法找回，请妥善保管。
+          </div>
+        </div>
+      </div>
+
       <div class="sticky-save">
         <div style="font-size:12px; color:var(--ink-muted);" id="saveStatus">所有修改保存后立即生效于前台</div>
         <div style="display:flex; gap:10px;">
@@ -389,6 +421,27 @@
       await api('/api/admin/settings/reset', { method: 'POST' });
       toast('已恢复默认');
       load();
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function changePassword() {
+    const oldPassword = document.getElementById('oldPassword').value;
+    const newUsername = document.getElementById('newUsername').value.trim();
+    const newPassword = document.getElementById('newPassword').value;
+    const newPassword2 = document.getElementById('newPassword2').value;
+
+    if (!oldPassword) return toast('请输入原密码', 'err');
+    if (!newPassword || newPassword.length < 6) return toast('新密码至少 6 位', 'err');
+    if (newPassword !== newPassword2) return toast('两次输入的新密码不一致', 'err');
+    if (!confirm('确认修改？修改成功后将自动退出登录。')) return;
+
+    try {
+      await api('/api/admin/password', {
+        method: 'PUT',
+        body: JSON.stringify({ oldPassword, newPassword, newUsername: newUsername || undefined })
+      });
+      toast('修改成功，即将跳转到登录页');
+      setTimeout(() => { location.href = '/admin/login.html'; }, 1200);
     } catch (e) { toast(e.message, 'err'); }
   }
 

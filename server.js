@@ -3,6 +3,28 @@ const session = require('express-session');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+
+function hashPassword(pw) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(String(pw), salt, 64).toString('hex');
+  return `scrypt:${salt}:${hash}`;
+}
+
+function verifyPassword(input, stored) {
+  if (!stored || !input) return false;
+  if (!String(stored).startsWith('scrypt:')) {
+    return String(input) === String(stored);
+  }
+  const [, salt, hash] = String(stored).split(':');
+  try {
+    const computed = crypto.scryptSync(String(input), salt, 64);
+    const expected = Buffer.from(hash, 'hex');
+    return computed.length === expected.length && crypto.timingSafeEqual(computed, expected);
+  } catch (e) {
+    return false;
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -221,11 +243,28 @@ app.post('/api/orders', (req, res) => {
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
   const db = loadDB();
-  if (username === db.admin.username && password === db.admin.password) {
+  if (username === db.admin.username && verifyPassword(password, db.admin.password)) {
     req.session.isAdmin = true;
     return res.json({ ok: true });
   }
   res.status(401).json({ error: '账号或密码错误' });
+});
+
+app.put('/api/admin/password', requireAuth, (req, res) => {
+  const { oldPassword, newPassword, newUsername } = req.body || {};
+  if (!oldPassword || !newPassword) return res.status(400).json({ error: '请填写原密码和新密码' });
+  if (String(newPassword).length < 6) return res.status(400).json({ error: '新密码至少 6 位' });
+  const db = loadDB();
+  if (!verifyPassword(oldPassword, db.admin.password)) {
+    return res.status(401).json({ error: '原密码错误' });
+  }
+  db.admin.password = hashPassword(newPassword);
+  if (newUsername && String(newUsername).trim()) {
+    db.admin.username = String(newUsername).trim();
+  }
+  saveDB(db);
+  // Invalidate current session — force re-login with new password
+  req.session.destroy(() => res.json({ ok: true }));
 });
 
 app.post('/api/admin/logout', (req, res) => {
