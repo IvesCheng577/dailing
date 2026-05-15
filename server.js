@@ -477,8 +477,5 @@ app.listen(PORT, () => {
   console.log(`  │                                          │`);
   console.log(`  │   前台:  http://localhost:${PORT}            │`);
   console.log(`  │   后台:  http://localhost:${PORT}/admin      │`);
-  console.log(`  │                                          │`);
-  console.log(`  │   默认账号: admin                         │`);
-  console.log(`  │   默认密码: admin123                      │`);
   console.log(`  ╰──────────────────────────────────────────╯\n`);
 });
